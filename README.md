@@ -1,5 +1,7 @@
 # TestingHelper GitHub Action and Reusable Workflow
 
+[![Test testinghelper-action](https://github.com/rulasg/testinghelper-action/actions/workflows/test-action.yml/badge.svg)](https://github.com/rulasg/testinghelper-action/actions/workflows/test-action.yml)
+
 Testing is key for a healthy and effitient development process.
 
 [TestingHelper](https://github.com/rulasg/testingHelper#readme) will help you on different faces of the developmnet lifecycle of a powershell module including testing.
@@ -10,13 +12,15 @@ The following two samples are equivalent. The first one will call the action as 
 
 ## Calling the action
 
-This workflow will run the action as a step.
+This workflow will run the action as a step to prepare the runner to run tests.
 
 ```yaml
 name: Test with TestingHelper-Action
 
-# Controls when the workflow will run
 on:
+
+  # Run as check on push request
+  push:
 
   # Run as check on pull request
   pull_request:
@@ -28,20 +32,22 @@ permissions:
   # To run test we only need to read the repository
   contents: read
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
   test:
-    # The type of runner that the job will run on
     runs-on: ubuntu-latest
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      # Runs a single command using the runners shell
-      - uses: rulasg/testinghelper-action@v1
+        # Setup TestingHelper for later use
+      - name: Setup TestingHelper
+        uses: rulasg/testinghelper-setup-action@v1
+        with:
+          Version: '2.0'
+
+        # Use setup TestingHelper version to run tests
+      - name: Run tests
+        uses: rulasg/testinghelper-action@v2
 ```
 
 ## Calling the reusuable workflow
@@ -51,23 +57,16 @@ This workflow will run the reusable workflow
 ```yaml
 
 name: Reusable Test Workflow
-
-# Controls when the workflow will run
 on:
-
-  # Run as check on pull request
   pull_request:
-
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
 permissions:
   # To run test we only need to read the repository
   contents: read
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job that will call a reusable workflow
   call-reusable-testinghelper-worfklow:
-    uses: rulasg/testinghelper-action/.github/workflows/testinghelper-workflow.yaml@v1
+    uses: rulasg/testinghelper-action/.github/workflows/testinghelper-workflow.yaml@main
 ```
